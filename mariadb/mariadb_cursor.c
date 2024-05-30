@@ -285,7 +285,7 @@ static struct PyMemberDef MrdbCursor_Members[] =
 static int MrdbCursor_initialize(MrdbCursor *self, PyObject *args,
         PyObject *kwargs)
 {
-    char *key_words[]= {"", "prefetch_size", "cursor_type", 
+    char *key_words[]= {"", "prefetch_size", "cursor_type",
                         "prepared", "binary", NULL};
     PyObject *connection;
     unsigned long cursor_type= 0,
@@ -354,9 +354,9 @@ PyTypeObject MrdbCursor_Type =
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "mariadb.cursor",
     .tp_basicsize= (Py_ssize_t)sizeof(MrdbCursor),
-    .tp_repr= (reprfunc)MrdbCursor_repr, 
+    .tp_repr= (reprfunc)MrdbCursor_repr,
     .tp_flags= Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_BASETYPE,
-    .tp_doc= mariadb_cursor_documentation, 
+    .tp_doc= mariadb_cursor_documentation,
     .tp_traverse= (traverseproc)MrdbCursor_traverse,/* tp_traverse */
     .tp_methods= (struct PyMethodDef *)MrdbCursor_Methods,
     .tp_members= (struct PyMemberDef *)MrdbCursor_Members,
@@ -483,7 +483,7 @@ static void ma_set_result_column_value(MrdbCursor *self, PyObject *row, uint32_t
             PyStructSequence_SET_ITEM(row, column, self->values[column]);
             break;
         case RESULT_DICTIONARY:
-            PyDict_SetItemString(row, self->fields[column].name, self->values[column]); 
+            PyDict_SetItemString(row, self->fields[column].name, self->values[column]);
             Py_DECREF(self->values[column]); /* CONPY-119 */
             break;
         default:
@@ -492,7 +492,7 @@ static void ma_set_result_column_value(MrdbCursor *self, PyObject *row, uint32_t
 }
 
 
-/* {{{ ma_cursor_close 
+/* {{{ ma_cursor_close
    closes the statement handle of current cursor. After call to
    cursor_close the cursor can't be reused anymore
  */
@@ -624,7 +624,7 @@ PyObject *MrdbCursor_InitResultSet(MrdbCursor *self)
     Py_RETURN_NONE;
 }
 
-static int Mrdb_execute_direct(MrdbCursor *self, 
+static int Mrdb_execute_direct(MrdbCursor *self,
                                const char *statement,
                                size_t statement_len)
 {
@@ -635,7 +635,7 @@ static int Mrdb_execute_direct(MrdbCursor *self,
 
    mariadb_get_infov(self->connection->mysql,
                       MARIADB_CONNECTION_EXTENDED_SERVER_CAPABILITIES, &ext_caps);
-   
+
    /* clear pending result sets */
    MrdbCursor_clear_result(self);
 
@@ -760,7 +760,7 @@ PyObject *MrdbCursor_description(MrdbCursor *self)
             PyObject *desc;
             Mrdb_ExtFieldType *ext_field_type= mariadb_extended_field_type(&self->fields[i]);
 
-            display_length= self->fields[i].max_length > self->fields[i].length ? 
+            display_length= self->fields[i].max_length > self->fields[i].length ?
                             self->fields[i].max_length : self->fields[i].length;
             mysql_get_character_set_info(self->connection->mysql, &cs);
             if (cs.mbmaxlen > 1)
@@ -1011,7 +1011,7 @@ MrdbCursor_parse(MrdbCursor *self, PyObject *stmt)
       old_paramcount= self->parseinfo.paramcount;
       MrdbCursor_clearparseinfo(&self->parseinfo);
     }
- 
+
     statement = (char *)PyUnicode_AsUTF8AndSize(stmt, (Py_ssize_t *)&statement_len);
 
     if (!(parser= MrdbParser_init(self->connection->mysql, statement, statement_len)))
@@ -1112,7 +1112,7 @@ MrdbCursor_execute_binary(MrdbCursor *self)
         mariadb_throw_exception(self->stmt, NULL, 1, NULL);
         goto error;
     }
-    
+
     self->field_count= mysql_stmt_field_count(self->stmt);
     Py_RETURN_NONE;
 
@@ -1135,7 +1135,7 @@ MrdbCursor_execute_text(MrdbCursor *self, PyObject *stmt)
         statement = PyUnicode_AsUTF8AndSize(stmt, (Py_ssize_t *)&statement_len);
     } else if (Py_TYPE(stmt) == &PyBytes_Type)
     {
-        PyBytes_AsStringAndSize(stmt, &statement, (Py_ssize_t *)&statement_len);
+        PyBytes_AsStringAndSize(stmt, (CHAR**)statement, (Py_ssize_t *)&statement_len);
     }
     else {
         PyErr_SetString(PyExc_TypeError, "Parameter must be a string or bytes");
@@ -1321,8 +1321,8 @@ MrdbCursor_check_text_types(MrdbCursor *self)
     if (PyDict_Check(self->data))
     {
       PyDict_Next(self->data, &ofs, NULL, &obj);
-    }    
-    else 
+    }
+    else
        obj= ListOrTuple_GetItem(self->data, i);
     if (PyBytes_Check(obj) ||
         PyByteArray_Check(obj) ||
